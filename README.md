@@ -1,4 +1,4 @@
-# GUPTCHAR
+# Project Relay
 
 A private, real-time chat application for friends only with hardcoded users, MongoDB storage, and responsive UI.
 
