@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../lib/api";
@@ -7,16 +7,36 @@ import FloatingAuthForm from "../components/auth/FloatingAuthForm";
 
 const TOKEN_KEY = "project-relay-token";
 const ONBOARDING_PENDING_KEY = "relay:onboarding-pending";
+
 const THEME_OPTIONS = [
   { id: "relay", label: "Relay Green" },
   { id: "blueprint", label: "Blueprint Blue" },
   { id: "sunburst", label: "Sunburst Yellow" },
 ];
+
 const UI_OPTIONS = [
   { id: "rounded", label: "Curved" },
   { id: "pointy", label: "Pointy" },
   { id: "glass", label: "Glassmorphism" },
 ];
+
+const DENSITY_OPTIONS = [
+  { id: "comfortable", label: "Comfortable" },
+  { id: "compact", label: "Compact" },
+];
+
+const BUBBLE_OPTIONS = [
+  { id: "solid", label: "Solid" },
+  { id: "outline", label: "Outline" },
+];
+
+const DEFAULT_PREFS = {
+  theme: "relay",
+  uiStyle: "rounded",
+  density: "comfortable",
+  bubbleStyle: "solid",
+  effects: true,
+};
 
 function roomName(room, currentUserId) {
   if (!room) return "";
@@ -25,33 +45,183 @@ function roomName(room, currentUserId) {
   return peer?.username || "Direct Chat";
 }
 
-function applyUiPreferences(theme, uiStyle) {
-  if (typeof document === "undefined") return;
-  document.body.setAttribute("data-theme", theme || "relay");
-  document.body.setAttribute("data-ui", uiStyle || "rounded");
+function getPrefKey(userId) {
+  return `relay:pref:${userId}`;
 }
 
-function OnboardingPreview({ theme, uiStyle }) {
+function applyUiPreferences(prefs) {
+  if (typeof document === "undefined") return;
+  const p = { ...DEFAULT_PREFS, ...(prefs || {}) };
+  document.body.setAttribute("data-theme", p.theme);
+  document.body.setAttribute("data-ui", p.uiStyle);
+  document.body.setAttribute("data-density", p.density);
+  document.body.setAttribute("data-bubble", p.bubbleStyle);
+  document.body.setAttribute("data-effects", p.effects ? "on" : "off");
+}
+
+function OnboardingPreview({ prefs }) {
   return (
-    <div className={`onboard-preview preview-theme-${theme} preview-ui-${uiStyle}`}>
+    <div className={`onboard-preview preview-theme-${prefs.theme} preview-ui-${prefs.uiStyle}`}>
       <div className="onboard-preview-header">
         <span className="dot" />
         <span className="line" />
       </div>
       <div className="onboard-preview-card">
-        <p className="title">Sample Workspace</p>
-        <p className="meta">Preview of your style selection</p>
+        <p className="title">Your Style Preview</p>
+        <p className="meta">Theme + shape + bubble mood</p>
         <div className="chips">
-          <span>Navbar</span>
-          <span>Conversations</span>
-          <span>Chat Pane</span>
+          <span>{prefs.theme}</span>
+          <span>{prefs.uiStyle}</span>
+          <span>{prefs.bubbleStyle}</span>
         </div>
       </div>
       <div className="onboard-preview-chat">
-        <div className="bubble left">Hey, ready to relay?</div>
-        <div className="bubble right">Looks good. Let&apos;s go.</div>
+        <div className="bubble left">Welcome to Project Relay</div>
+        <div className="bubble right">Looks perfect. Let&apos;s start.</div>
       </div>
     </div>
+  );
+}
+
+function SettingsPanel({ preferences, onChange, user, reopenOnboarding }) {
+  return (
+    <section className="panel settings-panel flex min-h-[80vh] flex-col rounded-2xl p-5 sm:p-6">
+      <div className="mb-5 border-b border-white/10 pb-4">
+        <p className="text-xs uppercase tracking-[0.16em] text-[#3299ff]">Settings</p>
+        <h3 className="text-xl font-semibold">Personalize Workspace</h3>
+        <p className="mt-1 text-sm text-slate-300">Adjust visuals and behavior for {user?.username}</p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="setting-card">
+          <p className="setting-title">Theme</p>
+          <div className="setting-row">
+            {THEME_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                className={`onboarding-choice ${preferences.theme === opt.id ? "is-active" : ""}`}
+                onClick={() => onChange({ theme: opt.id })}
+                type="button"
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="setting-card">
+          <p className="setting-title">UI Shape</p>
+          <div className="setting-row">
+            {UI_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                className={`onboarding-choice ${preferences.uiStyle === opt.id ? "is-active" : ""}`}
+                onClick={() => onChange({ uiStyle: opt.id })}
+                type="button"
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="setting-card">
+          <p className="setting-title">Density</p>
+          <div className="setting-row">
+            {DENSITY_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                className={`onboarding-choice ${preferences.density === opt.id ? "is-active" : ""}`}
+                onClick={() => onChange({ density: opt.id })}
+                type="button"
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="setting-card">
+          <p className="setting-title">Message Bubble</p>
+          <div className="setting-row">
+            {BUBBLE_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                className={`onboarding-choice ${preferences.bubbleStyle === opt.id ? "is-active" : ""}`}
+                onClick={() => onChange({ bubbleStyle: opt.id })}
+                type="button"
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="setting-card mt-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="setting-title">Visual Effects</p>
+            <p className="text-xs text-slate-400">Turn animated accents on/off.</p>
+          </div>
+          <button
+            type="button"
+            className={`toggle ${preferences.effects ? "is-on" : ""}`}
+            onClick={() => onChange({ effects: !preferences.effects })}
+          >
+            <span />
+          </button>
+        </div>
+      </div>
+
+      <div className="setting-card mt-4">
+        <p className="setting-title">Preview</p>
+        <OnboardingPreview prefs={preferences} />
+      </div>
+
+      <div className="mt-auto pt-4">
+        <button className="btn btn-blue" onClick={reopenOnboarding} type="button">Run Onboarding Again</button>
+      </div>
+    </section>
+  );
+}
+
+function ChatWorkspace({ activeRoom, messages, draft, setDraft, sendMessage, activeRoomId, user }) {
+  return (
+    <section className="panel flex min-h-[80vh] flex-col rounded-2xl">
+      <header className="border-b border-white/10 px-4 py-4 sm:px-5">
+        <p className="text-xs uppercase tracking-[0.15em] text-[#3299ff]">Active Room</p>
+        <h3 className="text-lg font-semibold sm:text-xl">{activeRoom ? roomName(activeRoom, user?.id) : "Select a conversation"}</h3>
+      </header>
+
+      <div className="flex-1 space-y-3 overflow-auto px-4 py-4 sm:px-5">
+        {messages.map((m) => {
+          const mine = m.senderId === user?.id;
+          return (
+            <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+              <div className={`chat-bubble ${mine ? "mine" : "theirs"}`}>
+                {!mine && <p className="mb-1 text-xs text-[#ffd447]">{m.sender?.username || "User"}</p>}
+                <p className="text-sm">{m.content}</p>
+              </div>
+            </div>
+          );
+        })}
+        {!messages.length && <p className="text-sm text-slate-400">No messages yet.</p>}
+      </div>
+
+      <form className="border-t border-white/10 p-4" onSubmit={sendMessage}>
+        <div className="flex gap-2">
+          <input
+            className="input"
+            disabled={!activeRoomId}
+            placeholder={activeRoomId ? "Type a message..." : "Choose a conversation"}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+          />
+          <button className="btn btn-green" disabled={!activeRoomId} type="submit">Send</button>
+        </div>
+      </form>
+    </section>
   );
 }
 
@@ -70,11 +240,16 @@ function ChatShell({
   searchUsers,
   createDirect,
   logout,
+  activeSection,
+  setActiveSection,
+  preferences,
+  onPreferencesChange,
+  reopenOnboarding,
 }) {
   const activeRoom = useMemo(() => rooms.find((room) => room.id === activeRoomId), [rooms, activeRoomId]);
 
   return (
-    <main className="mx-auto grid min-h-screen max-w-[1440px] grid-cols-1 gap-4 p-4 lg:grid-cols-[220px_320px_1fr]">
+    <main className="mx-auto grid min-h-screen max-w-[1500px] grid-cols-1 gap-3 p-3 md:gap-4 md:p-4 lg:grid-cols-[220px_320px_1fr]">
       <aside className="panel flex flex-col rounded-2xl p-4">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-[#35d07f]">Project Relay</p>
@@ -82,13 +257,31 @@ function ChatShell({
           <p className="text-xs text-slate-400">Live collaboration chat</p>
         </div>
 
-        <nav className="mt-8 space-y-2 text-sm">
-          <div className="rounded-lg border border-[#35d07f]/45 bg-[#10231a] px-3 py-2 text-[#ccffe5]">Messages</div>
-          <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-slate-300">Friends</div>
-          <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-slate-300">Preferences</div>
+        <nav className="mt-6 grid gap-2 text-sm">
+          <button
+            type="button"
+            onClick={() => setActiveSection("messages")}
+            className={`nav-item ${activeSection === "messages" ? "is-active" : ""}`}
+          >
+            Messages
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSection("friends")}
+            className={`nav-item ${activeSection === "friends" ? "is-active" : ""}`}
+          >
+            Friends
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSection("settings")}
+            className={`nav-item ${activeSection === "settings" ? "is-active" : ""}`}
+          >
+            Settings
+          </button>
         </nav>
 
-        <div className="mt-6 rounded-lg border border-white/10 bg-black/20 px-3 py-3 text-xs text-slate-300">
+        <div className="mt-5 rounded-lg border border-white/10 bg-black/20 px-3 py-3 text-xs text-slate-300">
           <p>Conversations: {rooms.length}</p>
           <p className="mt-1">Realtime: Connected</p>
         </div>
@@ -100,10 +293,11 @@ function ChatShell({
         </div>
       </aside>
 
-      <aside className="panel rounded-2xl p-4">
+      <aside className={`panel rounded-2xl p-4 ${activeSection === "settings" ? "opacity-60" : ""}`}>
         <div className="mb-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Find Friends</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{activeSection === "friends" ? "Friends" : "Find Friends"}</p>
         </div>
+
         <div className="mb-4 space-y-2">
           <input className="input" placeholder="Search users" value={search} onChange={(e) => setSearch(e.target.value)} />
           <button className="btn btn-blue w-full" onClick={searchUsers} type="button">Find</button>
@@ -127,7 +321,10 @@ function ChatShell({
             <button
               key={room.id}
               className={`w-full rounded-xl border px-3 py-3 text-left ${room.id === activeRoomId ? "border-[#ffd447] bg-[#11171d]" : "border-white/10 bg-[#0d1217]/70 hover:border-[#3299ff]"}`}
-              onClick={() => setActiveRoomId(room.id)}
+              onClick={() => {
+                setActiveSection("messages");
+                setActiveRoomId(room.id);
+              }}
               type="button"
             >
               <p className="font-medium">{roomName(room, user?.id)}</p>
@@ -138,48 +335,31 @@ function ChatShell({
         </div>
       </aside>
 
-      <section className="panel flex min-h-[80vh] flex-col rounded-2xl">
-        <header className="border-b border-white/10 px-5 py-4">
-          <p className="text-xs uppercase tracking-[0.15em] text-[#3299ff]">Active Room</p>
-          <h3 className="text-xl font-semibold">{activeRoom ? roomName(activeRoom, user?.id) : "Select a conversation"}</h3>
-        </header>
-
-        <div className="flex-1 space-y-3 overflow-auto px-5 py-4">
-          {messages.map((m) => {
-            const mine = m.senderId === user?.id;
-            return (
-              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[75%] rounded-2xl px-4 py-2 ${mine ? "bg-gradient-to-br from-[#35d07f] to-[#2bb56d] text-[#04150d]" : "bg-[#10161b] text-slate-100"}`}>
-                  {!mine && <p className="mb-1 text-xs text-[#ffd447]">{m.sender?.username || "User"}</p>}
-                  <p className="text-sm">{m.content}</p>
-                </div>
-              </div>
-            );
-          })}
-          {!messages.length && <p className="text-sm text-slate-400">No messages yet.</p>}
-        </div>
-
-        <form className="border-t border-white/10 p-4" onSubmit={sendMessage}>
-          <div className="flex gap-2">
-            <input
-              className="input"
-              disabled={!activeRoomId}
-              placeholder={activeRoomId ? "Type a message..." : "Choose a conversation"}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-            />
-            <button className="btn btn-green" disabled={!activeRoomId} type="submit">Send</button>
-          </div>
-        </form>
-      </section>
+      {activeSection === "settings" ? (
+        <SettingsPanel
+          preferences={preferences}
+          onChange={onPreferencesChange}
+          user={user}
+          reopenOnboarding={reopenOnboarding}
+        />
+      ) : (
+        <ChatWorkspace
+          activeRoom={activeRoom}
+          messages={messages}
+          draft={draft}
+          setDraft={setDraft}
+          sendMessage={sendMessage}
+          activeRoomId={activeRoomId}
+          user={user}
+        />
+      )}
     </main>
   );
 }
 
 function OnboardingOverlay({ token, user, onComplete, createDirect }) {
   const [step, setStep] = useState(0);
-  const [theme, setTheme] = useState("relay");
-  const [uiStyle, setUiStyle] = useState("rounded");
+  const [prefs, setPrefs] = useState(DEFAULT_PREFS);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [selectedFriendIds, setSelectedFriendIds] = useState([]);
@@ -214,17 +394,16 @@ function OnboardingOverlay({ token, user, onComplete, createDirect }) {
     setSaving(true);
     setError("");
     try {
-      const prefKey = `relay:pref:${user.id}`;
-      const prefs = { theme, uiStyle };
+      const prefKey = getPrefKey(user.id);
       window.localStorage.setItem(prefKey, JSON.stringify(prefs));
-      applyUiPreferences(theme, uiStyle);
+      applyUiPreferences(prefs);
 
       for (const friendId of selectedFriendIds) {
         await createDirect(friendId);
       }
 
       window.localStorage.removeItem(ONBOARDING_PENDING_KEY);
-      onComplete();
+      onComplete(prefs);
     } catch (e) {
       setError(e.message || "Failed to finish onboarding");
     } finally {
@@ -240,7 +419,7 @@ function OnboardingOverlay({ token, user, onComplete, createDirect }) {
 
         {step === 0 && (
           <div className="mt-5 space-y-4">
-            <p className="text-sm text-slate-300">Your account is ready. Let’s personalize Project Relay in a few quick steps.</p>
+            <p className="text-sm text-slate-300">Your account is ready. Let&apos;s personalize Project Relay in a few quick steps.</p>
             <button className="login-glow-btn" onClick={() => setStep(1)} type="button">Continue</button>
           </div>
         )}
@@ -253,14 +432,14 @@ function OnboardingOverlay({ token, user, onComplete, createDirect }) {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setTheme(item.id)}
-                  className={`onboarding-choice ${theme === item.id ? "is-active" : ""}`}
+                  onClick={() => setPrefs((p) => ({ ...p, theme: item.id }))}
+                  className={`onboarding-choice ${prefs.theme === item.id ? "is-active" : ""}`}
                 >
                   {item.label}
                 </button>
               ))}
             </div>
-            <OnboardingPreview theme={theme} uiStyle={uiStyle} />
+            <OnboardingPreview prefs={prefs} />
             <div className="flex justify-end">
               <button className="btn btn-blue" onClick={() => setStep(2)} type="button">Next</button>
             </div>
@@ -275,14 +454,14 @@ function OnboardingOverlay({ token, user, onComplete, createDirect }) {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setUiStyle(item.id)}
-                  className={`onboarding-choice ${uiStyle === item.id ? "is-active" : ""}`}
+                  onClick={() => setPrefs((p) => ({ ...p, uiStyle: item.id }))}
+                  className={`onboarding-choice ${prefs.uiStyle === item.id ? "is-active" : ""}`}
                 >
                   {item.label}
                 </button>
               ))}
             </div>
-            <OnboardingPreview theme={theme} uiStyle={uiStyle} />
+            <OnboardingPreview prefs={prefs} />
             <div className="flex justify-between">
               <button className="btn bg-[#0d1217] text-slate-200" onClick={() => setStep(1)} type="button">Back</button>
               <button className="btn btn-blue" onClick={() => setStep(3)} type="button">Next</button>
@@ -398,6 +577,8 @@ export default function HomePage() {
 
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("messages");
+  const [preferences, setPreferences] = useState(DEFAULT_PREFS);
 
   const [rooms, setRooms] = useState([]);
   const [activeRoomId, setActiveRoomId] = useState("");
@@ -409,7 +590,17 @@ export default function HomePage() {
 
   const [socket, setSocket] = useState(null);
 
+  function updatePreferences(patch) {
+    const next = { ...preferences, ...patch };
+    setPreferences(next);
+    applyUiPreferences(next);
+    if (user?.id) {
+      window.localStorage.setItem(getPrefKey(user.id), JSON.stringify(next));
+    }
+  }
+
   useEffect(() => {
+    applyUiPreferences(DEFAULT_PREFS);
     const saved = window.localStorage.getItem(TOKEN_KEY);
     if (saved) setToken(saved);
   }, []);
@@ -441,11 +632,15 @@ export default function HomePage() {
           setActiveRoomId(conversations.conversations[0].id);
         }
 
-        const prefKey = `relay:pref:${me.user.id}`;
+        const prefKey = getPrefKey(me.user.id);
         const rawPref = window.localStorage.getItem(prefKey);
         if (rawPref) {
-          const pref = JSON.parse(rawPref);
-          applyUiPreferences(pref.theme, pref.uiStyle);
+          const pref = { ...DEFAULT_PREFS, ...JSON.parse(rawPref) };
+          setPreferences(pref);
+          applyUiPreferences(pref);
+        } else {
+          setPreferences(DEFAULT_PREFS);
+          applyUiPreferences(DEFAULT_PREFS);
         }
 
         const pending = window.localStorage.getItem(ONBOARDING_PENDING_KEY) === "1";
@@ -620,6 +815,11 @@ export default function HomePage() {
         searchUsers={searchUsers}
         createDirect={createDirect}
         logout={logout}
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+        preferences={preferences}
+        onPreferencesChange={updatePreferences}
+        reopenOnboarding={() => setOnboardingOpen(true)}
       />
 
       {onboardingOpen && user && (
@@ -627,7 +827,11 @@ export default function HomePage() {
           token={token}
           user={user}
           createDirect={createDirect}
-          onComplete={() => setOnboardingOpen(false)}
+          onComplete={(prefs) => {
+            setPreferences(prefs || preferences);
+            applyUiPreferences(prefs || preferences);
+            setOnboardingOpen(false);
+          }}
         />
       )}
     </>
