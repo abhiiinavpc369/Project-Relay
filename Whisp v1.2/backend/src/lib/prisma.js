@@ -10,7 +10,7 @@ function ensureStore() {
   if (!fs.existsSync(STORE_FILE)) {
     fs.writeFileSync(
       STORE_FILE,
-      JSON.stringify({ users: [], conversations: [], conversationMembers: [], messages: [] }, null, 2)
+      JSON.stringify({ users: [], conversations: [], conversationMembers: [], messages: [], statuses: [] }, null, 2)
     );
   }
 }
@@ -35,6 +35,7 @@ function id() {
 }
 
 function selectFields(record, select) {
+  if (!record) return null;
   if (!select) return { ...record };
   const out = {};
   for (const key of Object.keys(select)) {
@@ -105,14 +106,25 @@ const prisma = {
       const created = {
         id: id(),
         username: data.username,
+        name: data.name || data.username,
         email: data.email,
         passwordHash: data.passwordHash,
+        bio: data.bio || "",
+        avatarUrl: data.avatarUrl || "",
         createdAt: now(),
         updatedAt: now(),
       };
       store.users.push(created);
       saveStore(store);
       return selectFields(created, select);
+    },
+
+    async update({ where, data, select } = {}) {
+      const user = store.users.find((u) => u.id === where?.id);
+      if (!user) return null;
+      Object.assign(user, data, { updatedAt: now() });
+      saveStore(store);
+      return selectFields(user, select);
     },
   },
 
@@ -180,6 +192,18 @@ const prisma = {
 
         return out;
       });
+    },
+
+    async create({ data, select } = {}) {
+      const created = {
+        id: id(),
+        userId: data.userId,
+        conversationId: data.conversationId,
+        joinedAt: now(),
+      };
+      store.conversationMembers.push(created);
+      saveStore(store);
+      return selectFields(created, select);
     },
   },
 
@@ -268,6 +292,8 @@ const prisma = {
         content: data.content,
         senderId: data.senderId,
         conversationId: data.conversationId,
+        type: data.type || "text",
+        meta: data.meta || null,
         createdAt: now(),
       };
       store.messages.push(created);

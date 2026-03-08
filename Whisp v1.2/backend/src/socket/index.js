@@ -10,7 +10,7 @@ function createSocketHandlers(io) {
       const payload = verifyToken(token);
       const user = await prisma.user.findUnique({
         where: { id: payload.userId },
-        select: { id: true, username: true, email: true },
+        select: { id: true, username: true, name: true, email: true, avatarUrl: true },
       });
 
       if (!user) return next(new Error("Unauthorized"));
@@ -40,7 +40,7 @@ function createSocketHandlers(io) {
       socket.emit("conversation:joined", { conversationId });
     });
 
-    socket.on("message:send", async ({ conversationId, content }) => {
+    socket.on("message:send", async ({ conversationId, content, type = "text", meta = null }) => {
       const safe = (content || "").toString().trim();
       if (!safe) {
         socket.emit("error:message", { message: "Message is empty" });
@@ -58,8 +58,8 @@ function createSocketHandlers(io) {
       }
 
       const message = await prisma.message.create({
-        data: { content: safe, senderId: socket.user.id, conversationId },
-        include: { sender: { select: { id: true, username: true, email: true } } },
+        data: { content: safe, type, meta, senderId: socket.user.id, conversationId },
+        include: { sender: { select: { id: true, username: true, name: true, email: true, avatarUrl: true } } },
       });
 
       await prisma.conversation.update({ where: { id: conversationId }, data: { updatedAt: new Date() } });

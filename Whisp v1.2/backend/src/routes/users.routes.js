@@ -18,7 +18,7 @@ router.get("/", authMiddleware, async (req, res) => {
             ]
           : undefined,
       },
-      select: { id: true, username: true, email: true },
+      select: { id: true, username: true, name: true, email: true, bio: true, avatarUrl: true },
       orderBy: { username: "asc" },
       take: 25,
     });
