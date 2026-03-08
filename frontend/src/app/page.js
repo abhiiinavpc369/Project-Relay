@@ -555,6 +555,7 @@ export default function HomePage() {
   function logout() {
     window.localStorage.removeItem(TOKEN_KEY);
     window.localStorage.removeItem(ONBOARDING_PENDING_KEY);
+    applyUiPreferences(DEFAULT_PREFS);
     setToken("");
   }
 
