@@ -1,0 +1,6 @@
+## notes.txt (Developer Notes)
+
+* Prioritize encryption correctness
+* Keep UI minimal
+* Log metadata only
+* Avoid feature bloat

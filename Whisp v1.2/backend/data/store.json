@@ -1,0 +1,100 @@
+{
+  "users": [
+    {
+      "id": "3c53ea1c89aa4b159e450b704f8d55df",
+      "username": "user80594",
+      "email": "user80594@example.com",
+      "passwordHash": "$2a$10$GrmFjexBozbqxc1FSlfAHu7zl9vTQ2X15ckxprOdQoUY7XsCnTznm",
+      "createdAt": "2026-03-08T07:44:24.978Z",
+      "updatedAt": "2026-03-08T07:44:24.978Z"
+    },
+    {
+      "id": "111c301f335542acb0031b50c0a0c6bb",
+      "username": "u45468",
+      "email": "u45468@example.com",
+      "passwordHash": "$2a$10$Euqo9sVdkItVabYxWoi4yuj.Mh7CSgQ4L7eH4DS/GmAfJK6Ci3g4a",
+      "createdAt": "2026-03-08T07:44:41.358Z",
+      "updatedAt": "2026-03-08T07:44:41.358Z"
+    },
+    {
+      "id": "37566e9778494921b08e842e7526b98f",
+      "username": "u66597",
+      "email": "u66597@example.com",
+      "passwordHash": "$2a$10$T4QWRa240Fm7n5mMXfkk5en5xQ9z9Eupx.oZqTyISj7eKvWs0r/ma",
+      "createdAt": "2026-03-08T07:44:41.537Z",
+      "updatedAt": "2026-03-08T07:44:41.537Z"
+    },
+    {
+      "id": "7f1becdea90b4886bbb4f3e7380d6941",
+      "username": "a63443",
+      "email": "a63443@example.com",
+      "passwordHash": "$2a$10$Fi3kf1MT8e7UUmJhmuTkgOjwSKQolS6P3NHTPE8RdNUQypEUzQVS.",
+      "createdAt": "2026-03-08T07:45:02.738Z",
+      "updatedAt": "2026-03-08T07:45:02.738Z"
+    },
+    {
+      "id": "4d1527109b724ddab6e5983290534bb5",
+      "username": "abhinavji369",
+      "email": "karn.abhinav00@gmail.com",
+      "passwordHash": "$2a$10$uvhmXLghlOZfhzPV2wXhyusswMSXbWzOom0UtLwBwDwadfLpTwWhC",
+      "createdAt": "2026-03-08T07:45:04.100Z",
+      "updatedAt": "2026-03-08T07:45:04.100Z"
+    },
+    {
+      "id": "55c8aaaaf22744f09a9b2ee53f38fdad",
+      "username": "z71096",
+      "email": "z71096@example.com",
+      "passwordHash": "$2a$10$47aIyOpsAxLPZF8tE7sTW.3dX3IxiSoY7YYl3e3WY6OXqOtTHLlmC",
+      "createdAt": "2026-03-08T07:45:14.069Z",
+      "updatedAt": "2026-03-08T07:45:14.069Z"
+    },
+    {
+      "id": "0ced376e68354fa19e7c045e0e199b66",
+      "username": "p54870",
+      "email": "p54870@example.com",
+      "passwordHash": "$2a$10$Sn4HMdhUSaKeskM3pijgKuWfj3s6SUO5qMclvIFrTXfKB4CHJNy8C",
+      "createdAt": "2026-03-08T07:45:29.777Z",
+      "updatedAt": "2026-03-08T07:45:29.777Z"
+    },
+    {
+      "id": "b76fd7c599c049f7ba78648620b6a3a5",
+      "username": "m30419",
+      "email": "m30419@example.com",
+      "passwordHash": "$2a$10$MeM/TnuzAtjyWh5YbZsRZ.qcI.7oHAF4fCvoffrT/v.75bPAmZgMq",
+      "createdAt": "2026-03-08T07:45:41.499Z",
+      "updatedAt": "2026-03-08T07:45:41.499Z"
+    },
+    {
+      "id": "e2b59280df7f41728d4d6f2dfdd89448",
+      "username": "n15075",
+      "email": "n15075@example.com",
+      "passwordHash": "$2a$10$PcpzzB6KFdj98fIgEHl9bOg8n6sXyyEs/A8b4jSs5BHN.FY6Hq0.m",
+      "createdAt": "2026-03-08T07:45:42.583Z",
+      "updatedAt": "2026-03-08T07:45:42.583Z"
+    }
+  ],
+  "conversations": [
+    {
+      "id": "1d548618eea444689429b092ffec7571",
+      "name": null,
+      "isGroup": false,
+      "createdAt": "2026-03-08T07:45:42.625Z",
+      "updatedAt": "2026-03-08T07:45:42.625Z"
+    }
+  ],
+  "conversationMembers": [
+    {
+      "id": "9e799407fee44413af002f1e069fc0ab",
+      "userId": "b76fd7c599c049f7ba78648620b6a3a5",
+      "conversationId": "1d548618eea444689429b092ffec7571",
+      "joinedAt": "2026-03-08T07:45:42.625Z"
+    },
+    {
+      "id": "5fc1b3ded02a40cea9e77baabea47e05",
+      "userId": "e2b59280df7f41728d4d6f2dfdd89448",
+      "conversationId": "1d548618eea444689429b092ffec7571",
+      "joinedAt": "2026-03-08T07:45:42.625Z"
+    }
+  ],
+  "messages": []
+}
